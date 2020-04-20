@@ -3,6 +3,8 @@ function init() {
 
     var scene = new THREE.Scene();
     var gui = new dat.GUI();
+    gui.closed = true;
+    var clock = new THREE.Clock();
 
     var enableFog = false;
 
@@ -10,38 +12,47 @@ function init() {
         scene.fog = new THREE.FogExp2(0xfc0303, 0.2);
     }
 
-    /* Lights in Three.js:
-        - PointLight (lightbulb)
-        - 
-
-    */
-    var pointLight = getPointLight(1);
+    // var box = getBox(1, 1, 1);
+    var plane = getPlane(30);
+    // var pointLight = getPointLight(1);
+    // var spotLight = getSpottLight(1);
+    var directionalLight = getDirectionalLight(1);
+    // var ambientLight = getAmbientLight(1);
     var sphere = getSphere(0.05);
-
-    var box = getBox(1, 1, 1);
-    var plane = getPlane(20);
+    var boxGrid = getBoxGrid(10, 1.5);
+    boxGrid.name = 'boxGrid';
+    // var helper = new THREE.CameraHelper(directionalLight.shadow.camera);
 
     plane.name = 'plane-1';
-    box.name = "box-1";
+    // box.name = "box-1";
 
     // Position the box on the ground
-    box.position.y = box.geometry.parameters.height / 2;
+    // box.position.y = box.geometry.parameters.height / 2;
     // Three.js uses radians
     plane.rotation.x = Math.PI / 2;
     // plane.position.y = 1;
-    pointLight.position.y = 2;
-    pointLight.intensity = 2;
+    directionalLight.intensity = 2;
+    directionalLight.position.x = 13;
+    directionalLight.position.y = 10;
+    directionalLight.position.z = 10;
+    // directionalLight.penumbra =.25;
 
-    gui.add(pointLight, 'intensity', 0, 10);
-    gui.add(pointLight.position, 'y', 0, 5);
+    gui.add(directionalLight, 'intensity', 0, 10);
+    gui.add(directionalLight.position, 'x', -20, 20);
+    gui.add(directionalLight.position, 'y', 0, 20);
+    gui.add(directionalLight.position, 'z', -20, 20);
+    // gui.add(directionalLight, 'penumbra', 0, 1);
 
     // Add geometry to plane
     // plane.add(box);
     // Add geometry to scene
-    scene.add(box);
+    // scene.add(box);
     scene.add(plane);
-    scene.add(pointLight);
-    pointLight.add(sphere);
+    scene.add(directionalLight);
+    directionalLight.add(sphere);
+    // scene.add(ambientLight);
+    scene.add(boxGrid);
+    // scene.add(helper);
 
     var camera = new THREE.PerspectiveCamera(
         45,
@@ -51,14 +62,15 @@ function init() {
     );
 
     // Move camera away from the scene origin
-    camera.position.x = 1;
-    camera.position.y = 2;
-    camera.position.z = 5;
+    camera.position.x = 10;
+    camera.position.y = 18;
+    camera.position.z = -18;
 
     // Look at the origin
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     var renderer = new THREE.WebGLRenderer();
+    renderer.shadowMap.enabled = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor('rgb(120,120,120)'/*0xfc0303*/);
     document.getElementById("webgl").appendChild(renderer.domElement);
@@ -66,7 +78,7 @@ function init() {
     var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 
-    updateScene(renderer, scene, camera, controls);
+    updateScene(renderer, scene, camera, controls, clock);
 
     return scene;
 }
@@ -77,8 +89,12 @@ function getBox(w, h, d) {
         color: 'rgb(120,120,120)',
         //0x0366fc,
     });
-    var mesh = new THREE.Mesh(geometry, material);
-
+    var mesh = new THREE.Mesh(
+        geometry,
+        material
+    );
+    mesh.castShadow = true;
+    
     return mesh;
 
     new TWEEN.Tween(mesh.material.color.getHSV())
@@ -93,6 +109,29 @@ function getBox(w, h, d) {
     .start();
 }
 
+function getBoxGrid(amount, separationMultiplier) {
+	var group = new THREE.Group();
+
+	for (var i=0; i<amount; i++) {
+		var obj = getBox(1, 1, 1);
+		obj.position.x = i * separationMultiplier;
+		obj.position.y = obj.geometry.parameters.height/2;
+		group.add(obj);
+		for (var j=1; j<amount; j++) {
+			var obj = getBox(1, 1, 1);
+			obj.position.x = i * separationMultiplier;
+			obj.position.y = obj.geometry.parameters.height/2;
+			obj.position.z = j * separationMultiplier;
+			group.add(obj);
+		}
+	}
+
+	group.position.x = -(separationMultiplier * (amount-1))/2;
+	group.position.z = -(separationMultiplier * (amount-1))/2;
+
+	return group;
+}
+
 function getPlane(size) {
     var geometry = new THREE.PlaneGeometry(size, size);
     var material = new THREE.MeshPhongMaterial({
@@ -100,7 +139,11 @@ function getPlane(size) {
         // 0xf2ff00,
         side: THREE.DoubleSide,
     });
-    var mesh = new THREE.Mesh(geometry, material);
+    var mesh = new THREE.Mesh(
+        geometry,
+        material
+    );
+    mesh.receiveShadow = true;
 
     return mesh;
 }
@@ -108,7 +151,7 @@ function getPlane(size) {
 function getSphere(size) {
     var geometry = new THREE.SphereGeometry(size, 24, 24);
     var material = new THREE.MeshBasicMaterial({
-        color: 'rgb(255,255,255)',
+        color: '#FCFF18',
         //0x0366fc,
     });
     var mesh = new THREE.Mesh(geometry, material);
@@ -118,11 +161,42 @@ function getSphere(size) {
 
 function getPointLight(intensity) {
     var light = new THREE.PointLight(0xffffff, intensity);
+    light.castShadow = true;
 
     return light;
 }
 
-function updateScene(renderer, scene, camera, controls) {
+function getSpottLight(intensity) {
+    var light = new THREE.SpotLight(0xffffff, intensity);
+    light.castShadow = true;
+
+    light.shadow.bias = 0.001;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
+
+    return light;
+}
+
+function getDirectionalLight(intensity) {
+    var light = new THREE.DirectionalLight(0xffffff, intensity);
+    light.castShadow = true;
+
+    // Default vaules: 5, -5
+    light.shadow.camera.top = 10;
+    light.shadow.camera.right = 10;
+    light.shadow.camera.bottom = -10;
+    light.shadow.camera.left = -10;
+
+    return light;
+}
+
+function getAmbientLight(intensity) {
+    var light = new THREE.AmbientLight(0x30f9ff, intensity);
+
+    return light;
+}
+
+function updateScene(renderer, scene, camera, controls, clock) {
     if (window.frame == 30){
         window.frame = 0;
     }
@@ -130,6 +204,16 @@ function updateScene(renderer, scene, camera, controls) {
         scene, 
         camera
     );
+
+    controls.update();
+
+    var timeElapsed = clock.getElapsedTime();
+
+    var boxGrid = scene.getObjectByName('boxGrid');
+    boxGrid.children.forEach(function(child, index) {
+        child.scale.y = (Math.sin(timeElapsed * 5 + index) + 1) / 2 + 0.001;
+        child.position.y = child.scale.y/2;
+    });
     // #region Extraneous
     // var plane = scene.getObjectByName('plane-1');
     // var box = scene.getObjectByName('box-1');
@@ -147,23 +231,28 @@ function updateScene(renderer, scene, camera, controls) {
 
     // console.info(window.frame);
 
-    // var info = document.getElementById("info");
-
-    // info.innerHTML = window.frame;
-
     // Apply methods to all children of scene object
     // scene.traverse(function(child) {
     //     child.scale.x += 0.001;
     // })
+
     // #endregion
+
+    var info = document.getElementById("info");
+    var xp = document.getElementById("xpos");
+    var yp = document.getElementById("ypos");
+    var zp = document.getElementById("zpos");
+
+    xp.innerHTML = camera.position.x.toFixed(2);
+    yp.innerHTML = camera.position.y.toFixed(2);
+    zp.innerHTML = camera.position.z.toFixed(2);
 
     requestAnimationFrame(function () {
         // Recursively call update to continue grabbing the new animation frames
-        updateScene(renderer, scene, camera, controls);
+        updateScene(renderer, scene, camera, controls, clock);
         
     });
 
-    controls.update();
 }
 
 THREE.Color.prototype.getHSV = function()
