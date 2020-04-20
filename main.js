@@ -62,7 +62,11 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor('rgb(120,120,120)'/*0xfc0303*/);
     document.getElementById("webgl").appendChild(renderer.domElement);
-    updateScene(renderer, scene, camera);
+    
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+
+    updateScene(renderer, scene, camera, controls);
 
     return scene;
 }
@@ -110,17 +114,6 @@ function getSphere(size) {
     var mesh = new THREE.Mesh(geometry, material);
 
     return mesh;
-
-    new TWEEN.Tween(mesh.material.color.getHSV())
-    .to({h: h, s: s, v: v}, 200)
-    .easing(TWEEN.Easing.Quartic.In)
-    .onUpdate(
-        function()
-        {
-            mesh.material.color.setHSV(this.h, this.s, this.v);
-        }
-    )
-    .start();
 }
 
 function getPointLight(intensity) {
@@ -129,7 +122,7 @@ function getPointLight(intensity) {
     return light;
 }
 
-function updateScene(renderer, scene, camera) {
+function updateScene(renderer, scene, camera, controls) {
     if (window.frame == 30){
         window.frame = 0;
     }
@@ -137,7 +130,7 @@ function updateScene(renderer, scene, camera) {
         scene, 
         camera
     );
-
+    // #region Extraneous
     // var plane = scene.getObjectByName('plane-1');
     // var box = scene.getObjectByName('box-1');
 
@@ -162,12 +155,15 @@ function updateScene(renderer, scene, camera) {
     // scene.traverse(function(child) {
     //     child.scale.x += 0.001;
     // })
+    // #endregion
 
     requestAnimationFrame(function () {
         // Recursively call update to continue grabbing the new animation frames
-        updateScene(renderer, scene, camera);
+        updateScene(renderer, scene, camera, controls);
         
     });
+
+    controls.update();
 }
 
 THREE.Color.prototype.getHSV = function()
