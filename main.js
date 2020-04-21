@@ -86,7 +86,7 @@ function init() {
 function getBox(w, h, d) {
     var geometry = new THREE.BoxGeometry(w, h, d);
     var material = new THREE.MeshPhongMaterial({
-        color: 'rgb(120,120,120)',
+        color: '#900303',
         //0x0366fc,
     });
     var mesh = new THREE.Mesh(
@@ -211,7 +211,8 @@ function updateScene(renderer, scene, camera, controls, clock) {
 
     var boxGrid = scene.getObjectByName('boxGrid');
     boxGrid.children.forEach(function(child, index) {
-        child.scale.y = (Math.sin(timeElapsed * 5 + index) + 1) / 2 + 0.001;
+        var x = timeElapsed * 5 + index;
+        child.scale.y = (noise.simplex2(x,x) + 1) / 2 + 0.001;
         child.position.y = child.scale.y/2;
     });
     // #region Extraneous
