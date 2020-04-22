@@ -1,73 +1,18 @@
 <!DOCTYPE html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Three.JS</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style type="text/css">
-            html, body { margin: 0; padding: 0; overflow: hidden; font-size: 14px;}
-            #info {
-                position: absolute;
-                top: 0px;
-                width: 100%;
-                text-align: center;
-                /* z-index: 100; */
-                display:block;
-                color: #fff;
-                font-family: 'Dank Mono';
-                font-size: 1rem;
-                font-weight: 900;
-                letter-spacing: -1px;
-                background-color: rgba(0,0,0,.25);
-                padding: .5rem;
-            }
-            #positions {
-                border: 1px solid rgba(255,255,255,.5);
-                width: 150px;
-                margin: .5rem auto;
-                padding: .5rem;
-            }
-            #positions > span {
-                color: rgba(255,255,255,.5);
-            }
-            .pos {
-                color: white;
-                line-height: normal;
-                font-size: .75rem;;
-                margin:0;
-            }
-            #xpos::before {
-                display: inline-block;
-                content: "x pos: ";
-            }
-            #ypos::before {
-                display: inline-block;
-                content: "y pos: ";
-            }
-            #zpos::before {
-                display: inline-block;
-                content: "z pos: ";
-            }
-        </style>
-    </head>
-    <body>
-        <div id="info">
-            Three.JS
-            <div id="positions">
-                <span>Camera</span>
-                <p class="pos" id="xpos"></p>
-                <p class="pos" id="ypos"></p>
-                <p class="pos" id="zpos"></p>
-            </div>
-        </div>
-        <div id="webgl"></div>
-
-        <script src="/lib/Tween.min.js"></script>
-        <script src="/lib/perlin.js"></script>
-        <script src="/lib/dat.gui.min.js"></script>
-        <script src="/lib/three.js"></script>
-        <script src="/lib/OrbitControls.js"></script>
-        <script src="./main.js"></script>
-    </body>
+<html>
+<head>
+	<title>Three.js</title>
+	<style type="text/css">
+		html, body {margin: 0; padding: 0; overflow: hidden}
+	</style>
+</head>
+<body>
+	<div id="webgl"></div>
+	<script src="/lib/Tween.min.js"></script>
+	<script src="/lib/perlin.js"></script>
+	<script src="/lib/dat.gui.min.js"></script>
+	<script src="/lib/three.js"></script>
+	<script src="/lib/OrbitControls.js"></script>
+	<script src="./main.js"></script>
+</body>
 </html>
