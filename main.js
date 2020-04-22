@@ -7,7 +7,7 @@ function init() {
 	var sphere = getSphere(sphereMaterial, 1, 24);
 
 	var planeMaterial = getMaterial('standard', 'rgb(255, 255, 255)');
-	var plane = getPlane(planeMaterial, 30);
+	var plane = getPlane(planeMaterial, 300);
 
 	var lightLeft = getSpotLight(1, 'rgb(255, 220, 180)');
 	var lightRight = getSpotLight(1, 'rgb(255, 220, 180)');
@@ -25,18 +25,39 @@ function init() {
 	lightRight.position.z = -4;
 
     // manipulate materials
+    // load cube map
+	var path = '/assets/cubemap/castle/';
+    var format = '.jpg';
+    var urls = [
+        path + 'px' + format, path + 'nx' + format,
+        path + 'py' + format, path + 'ny' + format,
+        path + 'pz' + format, path + 'nz' + format
+    ];
+    var reflectionCube = new THREE.CubeTextureLoader().load(urls);
+    reflectionCube.format = THREE.RGBFormat;
+
+    scene.background = reflectionCube;
+
     var loader = new THREE.TextureLoader();
     planeMaterial.map = loader.load('/assets/textures/concrete.jpg');
     planeMaterial.bumpMap = loader.load('/assets/textures/concrete.jpg');
     planeMaterial.bumpScale = 0.01;
+    planeMaterial.roughnessMap = loader.load('/assets/textures/concrete.jpg');
+    planeMaterial.metalness = 0.1;
+    planeMaterial.roughness = 0.7;
+    planeMaterial.envMap = reflectionCube;
+    sphereMaterial.roughnessMap = loader.load('/assets/textures/fingerprints.jpg');
+    sphereMaterial.envMap = reflectionCube;
+    
 
-    var maps = ['map', 'bumpMap'];
+    
+    var maps = ['map', 'bumpMap', 'roughnessMap'];
     
     maps.forEach(function(mapName) {
         var texture = planeMaterial[mapName];
         texture.wrapS = THREE.RepeatWrapping; // x in texture space
         texture.wrapT = THREE.RepeatWrapping; // y in texture space
-        texture.repeat.set(1.5,1.5);
+        texture.repeat.set(15,15);
     })
 
     
