@@ -6,10 +6,10 @@ function init() {
     gui.closed = false;
     var clock = new THREE.Clock();
 
-    var enableFog = false;
+    var enableFog = true;
 
     if (enableFog){
-        scene.fog = new THREE.FogExp2(0xfc0303, 0.2);
+        scene.fog = new THREE.FogExp2(0xffffff, 0.01);
     }
 
     // var box = getBox(1, 1, 1);
@@ -100,6 +100,30 @@ function init() {
     cameraYPosition.position.y = 1;
     cameraZPosition.position.z = 100;
 
+    new TWEEN.Tween({val: 100})
+        .to({val: -50}, 12000)
+        .onUpdate(function() {
+            cameraZPosition.position.z = this.val;
+        })
+        .start();
+
+    new TWEEN.Tween({val: -Math.PI/2})
+        .to({val:0}, 6000)
+        .delay(1000)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onUpdate(function(){
+            cameraXRotation.rotation.x = this.val;
+        })
+        .start();
+
+    new TWEEN.Tween({val: 0})
+        .to({val:Math.PI/2}, 6000)
+        .delay(1000)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onUpdate(function(){
+            cameraYRotation.rotation.y = this.val;
+        })
+        .start();
 
     gui.add(cameraZPosition.position, 'z', 0, 100);
     gui.add(cameraYRotation.rotation, 'y', -Math.PI, Math.PI);
@@ -246,16 +270,17 @@ function updateScene(renderer, scene, camera, controls, clock) {
     );
 
     controls.update();
+    TWEEN.update();
 
     var timeElapsed = clock.getElapsedTime();
 
-    var cameraXRotation = scene.getObjectByName('cameraXRotation');
-    if (cameraXRotation.rotation.x < 0) {
-        cameraXRotation.rotation.x += 0.01;
-    }
+    // var cameraXRotation = scene.getObjectByName('cameraXRotation');
+    // if (cameraXRotation.rotation.x < 0) {
+    //     cameraXRotation.rotation.x += 0.01;
+    // }
 
-    var cameraZPosition = scene.getObjectByName('cameraZPosition');
-    cameraZPosition.position.z -= 0.25;
+    // var cameraZPosition = scene.getObjectByName('cameraZPosition');
+    // cameraZPosition.position.z -= 0.25;
 
     var cameraZRotation = scene.getObjectByName('cameraZRotation');
     cameraZRotation.rotation.z = noise.simplex2(timeElapsed * 1.5, timeElapsed * 1.5) * 0.02;
