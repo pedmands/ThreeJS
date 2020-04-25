@@ -98,7 +98,7 @@ function init() {
 
 	return scene;
 }
-
+ 
 function getGeometry(type, size, material) {
 	var geometry;
 	var segmentMultiplier = 0.25;
